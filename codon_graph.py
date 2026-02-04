@@ -219,7 +219,7 @@ def main():
     total_rob_to_avg = 0
     total_edges_to_avg = 0
 
-    for run in range(1 if not RUN_MULTIPLE else 10000):
+    for run in range(1 if not RUN_MULTIPLE else 1000):
         # Step 1: Generate alphabet and codons
         alphabet = generate_alphabet(ALPHABET_SIZE)
         codons = generate_codons(alphabet, CODON_LENGTH)
