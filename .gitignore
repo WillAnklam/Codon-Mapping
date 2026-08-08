@@ -1,0 +1,5 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+biological_codon_graph.png

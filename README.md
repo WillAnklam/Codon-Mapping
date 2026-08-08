@@ -1,94 +1,55 @@
-# Codon Graph Visualization
+# Combinatorial Robustness of the Genetic Code
 
-A visualization tool for exploring mappings from codons to amino acids (colors) using Hamming distance graphs.
+This repository contains the computational part of our study of the standard genetic code as a Hamming graph. A codon is represented by a vertex of `H(3,4)`, and two codons are adjacent when they differ in exactly one nucleotide. Once each codon is assigned to an amino acid or stop signal, an edge is called *silent* when both endpoints have the same output.
 
-## Overview
+The main program builds this graph directly from the four-letter DNA alphabet and studies how the arrangement of synonymous codons affects the number of silent edges. No biological similarity scores or mutation weights are used; the calculation is purely combinatorial.
 
-This project models the relationship between genetic codons and their encoded amino acids as a graph where:
-- **Nodes** represent individual codons
-- **Edges** connect codons that differ by exactly one nucleotide (Hamming distance = 1)
-- **Node colors** represent the assigned amino acid
+## What the program does
 
-This structure is useful for studying:
-- Robustness of genetic code assignments
-- How mutations (single nucleotide changes) affect amino acid translation
-- Properties of codon partitioning schemes
+[`codon_robustness.py`](codon_robustness.py) carries out the following calculations:
 
-## Features
+1. Constructs all 64 codons and the 288 edges of `H(3,4)`.
+2. Encodes the standard genetic code, including the stop signal, and checks its degeneracy profile.
+3. Counts the silent edges in the biological assignment.
+4. Examines every swap of two codons with different outputs. These swaps preserve all class sizes.
+5. Applies the two improving Ser/Cys swaps and examines the full swap neighborhood of the resulting assignment.
+6. Checks the explicit zero-silent-edge assignment given in the paper's appendix.
+7. Calculates the random fixed-profile expectation and the classwise upper bound discussed in the paper.
 
-- **Configurable parameters**: Adjust alphabet size, codon length, and number of amino acids
-- **Flexible assignment modes**: Random or lexicographic codon-to-amino acid assignment
-- **Automatic partitioning**: Evenly distribute codons among amino acids
-- **Biological scale option**: Pre-configured for real DNA codons (4 nucleotides, triplets, 21 amino acids)
-- **Graph statistics**: Compute robustness metrics (intra-amino-acid edge fractions)
-- **Interactive visualization**: NetworkX + Matplotlib visualization with legend
+The exhaustive search considers 1,926 nontrivial codon swaps. The graph and genetic-code data are defined in the same file, so there are no external datasets or hidden preprocessing steps.
 
-## Installation
+## Running the analysis
 
-1. Clone the repository
-2. Create a virtual environment (optional but recommended):
-   ```bash
-   python -m venv myenv
-   myenv\Scripts\activate  # Windows
-   # or: source myenv/bin/activate  # Unix/macOS
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+Python 3.9 or newer is sufficient; the numerical analysis uses only the standard library.
 
-## Usage
-
-Run the visualization:
 ```bash
-python codon_graph.py
+python codon_robustness.py
 ```
 
-### Configuration
+The program prints the graph size, random expectation, biological robustness, improving swaps, and the result of the second local search. For use by another program, the same information can be written as JSON:
 
-Edit the CONFIG section at the top of `codon_graph.py` to customize:
-
-```python
-ALPHABET_SIZE = 3           # Number of unique nucleotides
-CODON_LENGTH = 2            # Length of each codon
-NUM_AMINO_ACIDS = 4         # Number of amino acid classes
-PARTITION = [3, 3, 2, 1]    # Distribution of codons per amino acid (optional)
-ASSIGNMENT_MODE = 'random'  # 'random' or 'lexicographic'
-SEED = 18                   # Random seed for reproducibility
-SHOW_NODE_LABELS = True     # Display codon labels on graph
+```bash
+python codon_robustness.py --json
 ```
 
-#### Biological Scale
+## Biological-code visualization
 
-Set `BIOLOGICAL_SCALE = True` to use standard DNA parameters:
-- 4 nucleotides (A, T, G, C)
-- Triplet codons (64 total)
-- 21 amino acids (standard genetic code partition)
+[`visualize_code.py`](visualize_code.py) draws the standard genetic code on the Hamming graph. Nodes are colored by output, silent edges are darkened, and nonsilent edges are shown faintly.
 
-### Example Output
-
-The script generates a colored network graph and prints robustness statistics:
-```
-Intra-amino-acid edges: 12/18 (0.667)
-Average robustness over 1 runs: 0.667
+```bash
+python -m pip install -r requirements.txt
+python visualize_code.py --output biological_codon_graph.png --labels
 ```
 
-Higher robustness indicates that most edge connections remain within the same amino acid class.
+The image is generated from the same codon assignment used in the analysis. It is not needed for the numerical calculations and is therefore not stored in the repository.
 
-## Algorithm
+## Repository contents
 
-1. Generate all possible codons from the alphabet
-2. Partition codons among amino acids according to the specified distribution
-3. Build a graph with Hamming distance = 1 edges
-4. Assign colors based on amino acid partition
-5. Visualize and compute robustness metrics
+- `codon_robustness.py` contains the genetic code, graph construction, robustness calculation, and exhaustive swap search.
+- `visualize_code.py` produces the optional graph visualization.
+- `requirements.txt` lists the packages used only for plotting.
 
-## Requirements
-
-- Python 3.7+
-- networkx
-- matplotlib
-- numpy
+Exploratory toy models, non-degeneracy-preserving reassignments, presentation scripts, virtual environments, and generated images are not part of this repository.
 
 ## Author
 
