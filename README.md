@@ -1,38 +1,45 @@
 # Combinatorial Robustness of the Genetic Code
 
-This repository contains the computational part of our study of the standard genetic code as a Hamming graph. A codon is represented by a vertex of `H(3,4)`, and two codons are adjacent when they differ in exactly one nucleotide. Once each codon is assigned to an amino acid or stop signal, an edge is called *silent* when both endpoints have the same output.
+This repository contains the Python code used to study the standard genetic code as a Hamming graph. Codons are the 64 vertices of `H(3,4)`, and two codons are connected when they differ in exactly one nucleotide. An edge is silent when its two codons have the same assigned output.
 
-The main program builds this graph directly from the four-letter DNA alphabet and studies how the arrangement of synonymous codons affects the number of silent edges. No biological similarity scores or mutation weights are used; the calculation is purely combinatorial.
+The calculation is deliberately unweighted: it does not use amino-acid similarity, mutation probabilities, codon usage, or substitution matrices.
 
-## What the program does
+## Computations
 
-[`codon_robustness.py`](codon_robustness.py) carries out the following calculations:
+[`codon_robustness.py`](codon_robustness.py) implements the computational work described in the paper:
 
-1. Constructs all 64 codons and the 288 edges of `H(3,4)`.
-2. Encodes the standard genetic code, including the stop signal, and checks its degeneracy profile.
-3. Counts the silent edges in the biological assignment.
-4. Examines every swap of two codons with different outputs. These swaps preserve all class sizes.
-5. Applies the two improving Ser/Cys swaps and examines the full swap neighborhood of the resulting assignment.
-6. Checks the explicit zero-silent-edge assignment given in the paper's appendix.
-7. Calculates the random fixed-profile expectation and the classwise upper bound discussed in the paper.
+1. It constructs the 64 codons and lists every unordered pair at Hamming distance one, producing the 288 edges of `H(3,4)`.
+2. It encodes the standard genetic code and counts its silent edges.
+3. It calculates the exact expected robustness for a uniformly random assignment with the biological degeneracy profile.
+4. It can generate and analyze random fixed-profile reassignments directly.
+5. It examines all unordered codon pairs, excludes synonymous pairs, and reconstructs and recounts every nontrivial degeneracy-preserving swap.
+6. It applies the two improving swaps found by the search and repeats the exhaustive search from the resulting assignment.
 
-The exhaustive search considers 1,926 nontrivial codon swaps. The graph and genetic-code data are defined in the same file, so there are no external datasets or hidden preprocessing steps.
+The genetic-code assignment is included in the program, so no external dataset or preprocessing step is required.
 
 ## Running the analysis
 
-Python 3.9 or newer is sufficient; the numerical analysis uses only the standard library.
+The main calculation uses only the Python standard library and requires Python 3.9 or newer.
 
 ```bash
 python codon_robustness.py
 ```
 
-The program prints the graph size, random expectation, biological robustness, improving swaps, and the result of the second local search. For use by another program, the same information can be written as JSON:
+Machine-readable output is available with:
 
 ```bash
 python codon_robustness.py --json
 ```
 
-## Biological-code visualization
+To perform random reassignment trials, specify the number of trials and a seed:
+
+```bash
+python codon_robustness.py --random-trials 10000 --seed 2026
+```
+
+Each trial draws uniformly from assignments with the biological degeneracy profile. The seed makes the sample reproducible.
+
+## Visualization
 
 [`visualize_code.py`](visualize_code.py) draws the standard genetic code on the Hamming graph. Nodes are colored by output, silent edges are darkened, and nonsilent edges are shown faintly.
 
@@ -41,16 +48,18 @@ python -m pip install -r requirements.txt
 python visualize_code.py --output biological_codon_graph.png --labels
 ```
 
-The image is generated from the same codon assignment used in the analysis. It is not needed for the numerical calculations and is therefore not stored in the repository.
+The generated image is not required for the numerical calculations and is not stored in the repository.
 
 ## Repository contents
 
-- `codon_robustness.py` contains the genetic code, graph construction, robustness calculation, and exhaustive swap search.
-- `visualize_code.py` produces the optional graph visualization.
-- `requirements.txt` lists the packages used only for plotting.
+- `codon_robustness.py`: graph construction, robustness calculation, random reassignment, and exhaustive codon-swap search.
+- `visualize_code.py`: optional visualization of the biological assignment.
+- `requirements.txt`: packages used only for visualization.
 
-Exploratory toy models, non-degeneracy-preserving reassignments, presentation scripts, virtual environments, and generated images are not part of this repository.
+## Authors
 
-## Author
+William Anklam, Naomi Hekman, and Michael Sill
 
-William Anklam
+## License
+
+The code in this repository is available under the [MIT License](LICENSE).
